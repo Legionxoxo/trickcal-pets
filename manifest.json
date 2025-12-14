@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Trickcal Chibi Go Pet",
+  "name": "Ai Pets",
   "version": "1.0",
-  "description": "Adds Trickcal Chibi pets to ChatGPT",
+  "description": "Adds Chibi pets to ChatGPT, Claude , Copilot and more!",
   "permissions": [
     "activeTab",
     "storage"
