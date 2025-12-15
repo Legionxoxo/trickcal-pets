@@ -31,7 +31,17 @@
         "https://gemini.google.com/*",
         "https://www.perplexity.ai/*",
         "https://copilot.microsoft.com/*",
-        "https://www.bing.com/chat*"
+        "https://www.bing.com/chat*",
+        "https://lovable.dev/*",
+        "https://bolt.new/*",
+        "https://createanything.com/*",
+        "https://www.createanything.com/*",
+        "https://chat.deepseek.com/*",
+        "https://www.blackbox.ai/*",
+        "https://app.blackbox.ai/*",
+        "https://v0.dev/*",
+        "https://v0.app/*",
+        "https://replit.com/*"
       ],
       "js": [
         "config.js",

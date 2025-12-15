@@ -234,6 +234,123 @@ class BasePet {
             }
         }
 
+        if (host.includes("bolt.new")) {
+            // Bolt: Look for the main textarea
+            const el = document.querySelector('textarea');
+            if (el) {
+                const rect = getContainer(el);
+                if (rect) {
+                    return {
+                        top: rect.top - 20,
+                        y: rect.top - 20,
+                        left: rect.left,
+                        right: rect.right,
+                        width: rect.width,
+                        height: rect.height,
+                        bottom: rect.bottom
+                    };
+                }
+            }
+        }
+
+        if (host.includes("lovable.dev")) {
+            // Lovable: Look for textarea or input
+            const el = document.querySelector('textarea') || document.querySelector('input[type="text"]');
+            if (el) {
+                const rect = getContainer(el);
+                if (rect) {
+                    return {
+                        top: rect.top - 20,
+                        y: rect.top - 20,
+                        left: rect.left,
+                        right: rect.right,
+                        width: rect.width,
+                        height: rect.height,
+                        bottom: rect.bottom
+                    };
+                }
+            }
+        }
+
+        if (host.includes("createanything.com")) {
+            // CreateAnything: Look for textarea or generic input
+            const el = document.querySelector('textarea');
+            if (el) return getContainer(el);
+        }
+
+        if (host.includes("deepseek.com")) {
+            // DeepSeek: Look for textarea
+            const el = document.querySelector('textarea');
+            if (el) return getContainer(el);
+        }
+
+        if (host.includes("blackbox.ai")) {
+            // Blackbox: specific textarea
+            // Only run on app or chat pages, usually they have the textarea
+            const el = document.querySelector('#chat-input-box');
+            if (el) {
+                const rect = getContainer(el);
+                if (rect) {
+                    // Apply 20px padding
+                    return {
+                        top: rect.top - 20,
+                        y: rect.top - 20,
+                        left: rect.left,
+                        right: rect.right,
+                        width: rect.width,
+                        height: rect.height,
+                        bottom: rect.bottom
+                    };
+                }
+            }
+        }
+
+        if (host.includes("v0.dev") || host.includes("v0.app")) {
+            // v0: Look for textarea or ProseMirror (Tiptap) editor
+            const input = document.querySelector('.ProseMirror') || document.querySelector('textarea');
+            if (input) {
+                // Try to find the wrapper form which has the border
+                const form = input.closest('form[data-prompt-form="true"]');
+                const rect = form ? form.getBoundingClientRect() : getContainer(input);
+
+                if (rect) {
+                    return {
+                        top: rect.top,
+                        y: rect.top,
+                        left: rect.left,
+                        right: rect.right,
+                        width: rect.width,
+                        height: rect.height,
+                        bottom: rect.bottom
+                    };
+                }
+            }
+        }
+
+        if (host.includes("replit.com")) {
+            // Replit: Only show in workspace (paths with /@) or user home/repls (paths with /~)
+            if (!window.location.pathname.includes('/@') && !window.location.pathname.includes('/~')) return null;
+
+            // Replit: Look for AI prompt input (CodeMirror) or main Monaco editor
+            const el = document.querySelector('#ai-prompt-input') || document.querySelector('.monaco-editor') || document.querySelector('textarea');
+            if (el) {
+                // For #ai-prompt-input, use it directly as it's the specific container or check for parent if needed.
+                // The provided snippet shows #ai-prompt-input is the container ID.
+                const rect = (el.id === 'ai-prompt-input') ? el.getBoundingClientRect() : getContainer(el);
+                if (rect) {
+                    return {
+                        top: rect.top,
+                        y: rect.top,
+                        left: rect.left,
+                        right: rect.right,
+                        width: rect.width,
+                        height: rect.height,
+                        bottom: rect.bottom
+                    };
+                }
+            }
+        }
+
         // 2. Generic Fallback: Find the largest bottom-positioned text entry
         // Candidates: textarea, input[type=text], [contenteditable]
         const candidates = [
@@ -695,6 +812,24 @@ function init() {
 
 function gameLoop() {
     if (!isContextValid) return; // Stop loop if extension updated/reloaded
+
+    // Check if we are on a valid page (simple check: if specific site rules return null, we might want to hide)
+    // For now, we rely on the pets existing. If we want to hide them on non-chat pages:
+    const host = window.location.hostname;
+    if (host.includes("replit.com") && !window.location.pathname.includes('/@') && !window.location.pathname.includes('/~')) {
+        // Hide all pets on Replit dashboard (if neither /@ nor /~)
+        pets.forEach(p => p.element.style.display = 'none');
+        requestAnimationFrame(gameLoop);
+        return;
+    } else if (host.includes("blackbox.ai") && !document.querySelector('#chat-input-box')) {
+        // Hide on Blackbox non-chat pages (landing page etc)
+        pets.forEach(p => p.element.style.display = 'none');
+        requestAnimationFrame(gameLoop);
+        return;
+    } else {
+        pets.forEach(p => p.element.style.display = 'block');
+    }
+
     for (const pet of pets) {
         pet.physicsTick();
         pet.behaviorTick();
